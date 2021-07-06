@@ -1,16 +1,14 @@
 import cpu
 import math
-from colorama import Fore, Back
+import sys
 
-
-def cmmdc():
+def cmmdc(x, y):
 
     fileAddress = open('1address.txt', 'w')
 
-    x = input('Choose first number: ')
-    y = input('Choose second number: ')
     x_int = int(x)
     y_int = int(y)
+
     if (x_int < y_int):
         x_int, y_int = y_int, x_int
     fileAddress.write("LOAD " + str(y_int) + '\n')
@@ -35,12 +33,9 @@ def cmmdc():
 
 
 
-def cmmmc():
+def cmmmc(x,y):
 
     fileAddress = open('1address.txt', 'w')
-
-    x = input('Choose first number: ')
-    y = input('Choose second number: ')
 
     x_int = int(x)
     y_int = int(y)
@@ -75,11 +70,9 @@ def cmmmc():
 
 
 
-def ec2():
-    print("ax^2 + bx + c = 0")
-    a = input('ax^2, a = ')
-    b = input('bx, b = ')
-    c = input('c, c = ')
+def ec2(a, b , c):
+
+    fileAddress = open('1address.txt', 'w')
 
     a_int = int(a)
     b_int = int(b)
@@ -93,8 +86,6 @@ def ec2():
         var = math.sqrt(var)
 
     var = int(var)
-
-    fileAddress = open('1address.txt', 'w')
 
     fileAddress.write('LOAD ' + '4' + '\n')
     fileAddress.write('MUL '+ a + '\n')
@@ -131,14 +122,14 @@ def ec2():
     fileAddress.close()
 
 
-def prim():
-    fileAddress = open('1address.txt', 'w')
+def prim(x):
 
-    x = input('Choose a number: ')
+    fileAddress = open('1address.txt', 'w')
 
     x_int = int(x)
     div_int = 2
     flag_int = 1
+    flag_neg = 0
 
     fileAddress.write("LOAD " + str(div_int) + '\n')
     fileAddress.write("STORE T\n")
@@ -147,6 +138,7 @@ def prim():
     if x_int < 0:
         fileAddress.write("OPP AC\n")
         x_int = abs(int(x_int))
+        flag_neg = 1
 
     for x in range (2, int(x_int / 2 + 1)):
         if int(x_int) % int(div_int) == 0:
@@ -162,17 +154,21 @@ def prim():
     fileAddress.write("LOAD " + str(flag_int) + '\n')
     fileAddress.write("STORE REZ\n")
     fileAddress.write("CLR AC\n")
-    fileAddress.write("SWAP T\n")
-    fileAddress.write("OUT ALL\n")
+
+    if flag_neg == 1:
+        fileAddress.write("OPP T\n")
+        fileAddress.write("SWAP T\n")
+        fileAddress.write("OUT ALL\n")
+    else:
+        fileAddress.write("SWAP T\n")
+        fileAddress.write("OUT ALL\n")
 
     fileAddress.close()
 
 
-def gauss():
+def gauss(x):
 
     fileAddress = open('1address.txt', 'w')
-
-    x = input('Choose a number: ')
     
     x_int = int(x)
     neg = False
@@ -188,19 +184,18 @@ def gauss():
     for index in range(x_int):
         fileAddress.write("ADD T\n")
         fileAddress.write("INC T\n")
+    fileAddress.write("DEC T\n")
 
     if neg == True:
         fileAddress.write("OPP AC\n")
 
     fileAddress.write("OUT ALL\n")
 
+
     fileAddress.close()
 
-ec2()
 
 
 registrii = cpu.cpu()
 fileText = open("binary.txt", "r")
 registrii.functionSwitch(fileText)
-
-print(Fore.GREEN + Back.RESET + "Press ENTER to exit the program...")

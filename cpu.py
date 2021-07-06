@@ -11,8 +11,8 @@
 # ============ EXTERNAL MODULES ==============
 
 import os
+import sys
 
-from colorama import Fore, Back
 
 class cpu:
     # ============================================================
@@ -28,6 +28,7 @@ class cpu:
     UNDERFLOW = False  # MEMORY UNDERFLOW, MIN VALUE -255
     InstructionRegister = 0  # INSTRUCTION
 
+    output_file = open("OUTPUT.TXT", "w")
     # ===================== ALL OPERATIONS =======================
 
     # ADD A REGISTER / NUMBER TO ANOTHER REGISTER
@@ -55,8 +56,6 @@ class cpu:
 
     # SUBSTRECT A REGISTER / NUMBER FROM ANOTHER REGISTER
     def subNumber(self, valoare):
-
-
 
         if valoare == 'T':
             temporar = int(self.AC) - int(self.Temp)
@@ -117,6 +116,9 @@ class cpu:
             self.AC //= self.Result
 
         elif valoare.isdigit() == True and valoare != '0':
+            self.AC //= int(valoare)
+
+        elif valoare[1].isdigit() == True and valoare[0] == '-' and int(valoare) < 0:
             self.AC //= int(valoare)
 
         else:
@@ -223,19 +225,19 @@ class cpu:
 
     # PRINT A REGISTER
     def outNumber(self, valoare):
-
-        if valoare == 'AC':
-            print(Fore.RED + "AC [", self.AC, "]\n")
-        elif valoare == 'REZ':
-            print(Fore.YELLOW + "REZ [", self.Result, "]\n")
-        elif valoare == 'T':
-            print(Fore.CYAN + "T [", self.Temp, "]\n")
-        elif valoare == 'ALL':
-            print(Fore.RED + "AC [", self.AC, "]\n")
-            print(Fore.YELLOW + "REZ [", self.Result, "]\n")
-            print(Fore.CYAN + "T [", self.Temp, "]\n")
-        else:
-            self.fault()
+        with open("OUTPUT.txt", 'w') as text_file:
+            if valoare == 'AC':
+                 print(f"AC [", self.AC, "]\n", file = text_file )
+            elif valoare == 'REZ':
+                 print(f"REZ [", self.Result, "]\n", file = text_file )
+            elif valoare == 'T':
+                 print(f"T [", self.Temp, "]\n", file = text_file )
+            elif valoare == 'ALL':
+                 print(f"AC [", self.AC, "]\n", file = text_file )
+                 print(f"REZ [", self.Result, "]\n", file = text_file )
+                 print(f"T [", self.Temp, "]\n", file = text_file )
+            else:
+                 self.fault()
 
         self.ProgramCounter += 1
 
@@ -253,9 +255,10 @@ class cpu:
 
     # HELP COMMAND
     def help(self):
-        with open("HELP.txt") as helpFile:
-            for line in helpFile:
-                print(Fore.GREEN + line.strip())
+        with open ("OUTPUT.txt", 'w') as text_file:
+            with open("HELP.txt", 'r') as helpFile:
+                for line in helpFile:
+                    text_file.write(line)
 
     # CLEAR REGISTER
     def clear(self, valoare):
@@ -277,9 +280,8 @@ class cpu:
 
     # EXIT THE PROGRAM
     def exit(self):
-        print(Fore.GREEN + Back.RESET + "Press ENTER to exit the program...")
-        input()
-        return
+        self.STATUS = False
+
 
     # ============================================================
 
@@ -291,10 +293,11 @@ class cpu:
             open('1address.txt', 'w').close()
 
         self.conversieBinar()
-        cmdFile = open("1address.txt", "r")
+        if self.STATUS == True:
+         cmdFile = open("1address.txt", "r")
 
-        # GET LINE
-        for line in cmdFile:
+         # GET LINE
+         for line in cmdFile:
 
             if line == '\n':
                 self.ProgramCounter += 1
@@ -403,21 +406,25 @@ class cpu:
     def fault(self):
 
         self.STATUS = False
-        print(Fore.GREEN + Back.RESET + "Error, Wrong instruction at line ", self.ProgramCounter, "!\n")
+        with open("OUTPUT.txt", 'w') as text_file:
+            print(f"Error, Wrong instruction at line ", self.ProgramCounter, "!\n", file = text_file)
         self.BlueScreen()
 
     # PRINT ALL DETAILS FOR THE ERROR
 
     def BlueScreen(self):
-        print(Fore.GREEN + "CPU REGISTERS: \n")
-        print(Fore.BLUE + "Result Register [", self.Result, "]\n")
-        print(Fore.RED + "AC Register [", self.AC, "]\n")
-        print(Fore.YELLOW + "Temporar Register [", self.Temp, "]\n")
-        print(Fore.CYAN + "Status [", self.STATUS, "]\n")
-        print(Fore.MAGENTA + "Overflow [", self.OVERFLOW, "]\n")
-        print(Fore.MAGENTA + "Underflow [", self.UNDERFLOW, "]\n")
-        print(Fore.RED + Back.WHITE + "Program Counter [", self.ProgramCounter, "]\n")
-        print(Fore.RED + Back.WHITE + "Instruction Register [", self.InstructionRegister, "]\n")
+
+        with open("OUTPUT.txt",'w') as text_file:
+            print(f"CPU REGISTERS: \n", file = text_file )
+            print(f"Result Register [", self.Result, "]\n", file = text_file )
+            print(f"AC Register [", self.AC, "]\n", file = text_file )
+            print(f"Temporar Register [", self.Temp, "]\n", file = text_file )
+            print(f"Status [", self.STATUS, "]\n", file = text_file )
+            print(f"Overflow [", self.OVERFLOW, "]\n", file = text_file )
+            print(f"Underflow [", self.UNDERFLOW, "]\n", file = text_file )
+            print(f"Program Counter [", self.ProgramCounter, "]\n", file = text_file )
+            print(f"Instruction Register [", self.InstructionRegister, "]\n", file = text_file )
+
 
 
     def conversieBinar(self):
@@ -432,14 +439,17 @@ class cpu:
                 continue
 
             elif len(line) > 16:
-                print(Fore.RED + Back.WHITE + "Error binary code, line: ", contorBinar, "\n")
+                with open("OUTPUT.txt", 'w') as text_file:
+                    print(f"Error binary code, line: ", contorBinar, "\n", file = text_file )
+
                 self.exit()
 
             else:
                 #ERROR 0/1 IN BINARY FILE LINE
                 for x in range(1, 15):
                     if line[x] != '1' and line[x] != '0':
-                        print(Fore.RED + Back.WHITE + "Error binary code, line: ", contorBinar, "\n")
+                        with open("OUTPUT.txt", 'w') as text_file:
+                            print(f"Error binary code, line: ", contorBinar, "\n", file = text_file )
                         self.exit()
 
                 binar = line
@@ -508,14 +518,6 @@ class cpu:
 
         f.close()
 
-    # =================================================
-
-"""registrii = cpu()
-fileText = open("binary.txt", "r")
-registrii.functionSwitch(fileText)
-
-print(Fore.GREEN + Back.RESET + "Press ENTER to exit the program...")
-
-"""
+# =================================================
 
 # ==================================================
